@@ -10,22 +10,44 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weather_app_ios/src/app.dart';
+import 'package:weather_app_ios/src/settings/settings_controller.dart';
+import 'package:weather_app_ios/src/settings/settings_service.dart';
 
 void main() {
   group('MyWidget', () {
-    testWidgets('should display a string of text', (WidgetTester tester) async {
+    testWidgets('should display a intial value of text',
+        (WidgetTester tester) async {
       // Define a Widget
-      const myWidget = MaterialApp(
-        home: Scaffold(
-          body: Text('Hello'),
-        ),
-      );
+      final settingsController = SettingsController(SettingsService());
+      await settingsController.loadSettings();
+      await tester.pumpWidget(MyApp(settingsController: settingsController));
 
-      // Build myWidget and trigger a frame.
-      await tester.pumpWidget(myWidget);
+      var findCounterText = find.text("0");
+      expect(findCounterText, findsOneWidget);
 
-      // Verify myWidget shows some text
-      expect(find.byType(Text), findsOneWidget);
+      OutlinedButton incrementButton = find
+          .widgetWithText(OutlinedButton, "Increment")
+          .evaluate()
+          .first
+          .widget as OutlinedButton;
+      incrementButton.onPressed!.call();
+      await tester.pumpAndSettle();
+      findCounterText = find.text("1");
+      expect(findCounterText, findsOneWidget);
+
+      OutlinedButton decrementButton = find
+          .widgetWithText(OutlinedButton, "Decrement")
+          .evaluate()
+          .first
+          .widget as OutlinedButton;
+
+      decrementButton.onPressed!.call();
+      await tester.pumpAndSettle();
+      findCounterText = find.text("0");
+      expect(findCounterText, findsOneWidget);
+
+      print(decrementButton);
     });
   });
 }
